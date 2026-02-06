@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "agricultural-server": {
+      "command": "python",
+      "args": [
+        "mcp_server.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },    "weather-server": {
+      "command": "D:\\projects\\env\\Scripts\\python.exe",
+      "args": [
+        "D:\\projects\\my_mcp_demo\\server\\weather_server.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    "text-analysis-pro": {
+      "command": "D:\\projects\\env\\Scripts\\mcp-text-analysis.exe",
+      "args": [],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+
+  }
