@@ -2,22 +2,17 @@
   "mcpServers": {
     "agricultural-server": {
       "command": "python",
-      "args": [
-        "mcp_server.py"
-      ],
+      "args": ["mcp_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8"
       }
-    },    "weather-server": {
-      "command": "C:\\Users\\HP\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe",
-      "args": [
-        "F:\\HP\\Alumnx\\Feb_7_Saturday_event\\mcp_agent\\server\\weather_server.py"
-      ],
+    },
+    "weather-server": {
+      "command": "python",
+      "args": ["weather_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8"
       }
     }
-    
   }
-
-  }
+}
