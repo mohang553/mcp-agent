@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "weather-server": {
-      "command": "python3",
+      "command": "python",
       "args": ["weather_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8"
