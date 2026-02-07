@@ -259,7 +259,7 @@ class DynamicMCPAgent:
             raise ValueError("GOOGLE_API_KEY not found in environment variables!")
         
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash-lite",
             temperature=0,
             google_api_key=api_key
         )
@@ -296,30 +296,133 @@ class DynamicMCPAgent:
             inputs = {"messages": [HumanMessage(content=user_message)]}
             result = await self.agent_executor.ainvoke(inputs)
             
-            # Extract final answer
-            final_answer = result["messages"][-1].content
+            print(f"\n🔍 DEBUGGING INFO:")
+            print(f"Result type: {type(result)}")
+            print(f"Result keys: {result.keys() if isinstance(result, dict) else 'N/A'}")
             
-            # Extract intermediate steps (tool calls)
+            # Extract final answer from the last message
+            final_answer = ""
             intermediate_steps = []
-            for msg in result["messages"][:-1]:
-                if hasattr(msg, 'name') and msg.name:
-                    intermediate_steps.append(f"Tool used: {msg.name}")
+            tool_results = ""
             
-            print(f"\n✅ Agent completed")
-            print(f"{'='*70}\n")
+            # Check if we have a valid result with messages
+            if not isinstance(result, dict):
+                print(f"❌ Result is not a dict: {type(result)}")
+                final_answer = str(result)
+            
+            elif "messages" not in result:
+                print(f"❌ No 'messages' key in result")
+                print(f"Available keys: {list(result.keys())}")
+                final_answer = str(result)
+            
+            else:
+                messages = result["messages"]
+                print(f"\n📨 Total messages: {len(messages)}")
+                
+                # Parse all messages
+                for i, msg in enumerate(messages):
+                    msg_type = type(msg).__name__
+                    print(f"\n  Message [{i}] Type: {msg_type}")
+                    
+                    # Show content if available
+                    if hasattr(msg, 'content'):
+                        content_preview = msg.content[:100] if msg.content else "(empty)"
+                        print(f"    Content: {content_preview}...")
+                    
+                    # Check for tool calls
+                    if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                        print(f"    Tool calls: {len(msg.tool_calls)}")
+                        for j, tool_call in enumerate(msg.tool_calls):
+                            if isinstance(tool_call, dict):
+                                tool_name = tool_call.get('name', 'unknown')
+                            else:
+                                tool_name = getattr(tool_call, 'name', 'unknown')
+                            
+                            intermediate_steps.append(f"Tool used: {tool_name}")
+                            print(f"      [{j}] {tool_name}")
+                    
+                    # Capture tool results
+                    if msg_type == "ToolMessage" and hasattr(msg, 'content'):
+                        tool_results = msg.content
+                        print(f"    ✅ Tool result captured ({len(tool_results)} chars)")
+                
+                print(f"\n🎯 EXTRACTION:")
+                
+                # Get the final response (last message with content)
+                if messages:
+                    last_msg = messages[-1]
+                    print(f"Last message type: {type(last_msg).__name__}")
+                    
+                    if hasattr(last_msg, 'content'):
+                        final_answer = last_msg.content
+                        print(f"Content length: {len(final_answer)} chars")
+                        
+                        # ⭐ FIX: If Gemini returned empty, use tool results
+                        if not final_answer or len(final_answer.strip()) == 0:
+                            print(f"\n⚠️  Gemini returned empty response!")
+                            print(f"📊 Using tool results instead...")
+                            
+                            # We have tool results, so let's use them as the response
+                            if tool_results:
+                                final_answer = tool_results
+                                print(f"✅ Using tool result data as response")
+                            else:
+                                final_answer = "Tool execution completed but no data was returned."
+                        else:
+                            print(f"✅ Final answer found! Length: {len(final_answer)} chars")
+                            if final_answer:
+                                print(f"Preview: {final_answer[:200]}...")
+                    else:
+                        print(f"❌ Last message has no 'content' attribute")
+                        # Try to use tool results as fallback
+                        if tool_results:
+                            final_answer = tool_results
+                            print(f"Using tool results as fallback")
+                else:
+                    print(f"❌ No messages in result")
+            
+            print(f"\n{'='*70}\n")
             
             return {
-                "response": final_answer,
-                "intermediate_steps": intermediate_steps
+                "response": final_answer if final_answer else "",
+                "intermediate_steps": intermediate_steps,
+                "error": None
             }
             
         except Exception as e:
-            error_msg = f"Agent error: {str(e)}"
-            print(f"❌ {error_msg}")
+            error_msg = f"Agent execution error: {str(e)}"
+            print(f"\n❌ EXCEPTION OCCURRED:")
+            print(f"Error: {error_msg}")
+            
+            # Print full traceback for debugging
+            import traceback
+            print("\nFull traceback:")
+            traceback.print_exc()
+            print()
+            
             return {
-                "response": "Sorry, I encountered an error processing your request.",
+                "response": "",
+                "intermediate_steps": [],
                 "error": error_msg
             }
+
+        except Exception as e:
+            error_msg = f"Agent execution error: {str(e)}"
+            print(f"\n❌ EXCEPTION OCCURRED:")
+            print(f"Error: {error_msg}")
+            
+            # Print full traceback for debugging
+            import traceback
+            print("\nFull traceback:")
+            traceback.print_exc()
+            print()
+            
+            return {
+                "response": "",
+                "intermediate_steps": [],
+                "error": error_msg
+            }
+
 
 
 # ============================================================================

@@ -9,21 +9,15 @@
         "PYTHONIOENCODING": "utf-8"
       }
     },    "weather-server": {
-      "command": "D:\\projects\\env\\Scripts\\python.exe",
+      "command": "C:\\Users\\HP\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe",
       "args": [
-        "D:\\projects\\my_mcp_demo\\server\\weather_server.py"
+        "F:\\HP\\Alumnx\\Feb_7_Saturday_event\\mcp_agent\\server\\weather_server.py"
       ],
       "env": {
         "PYTHONIOENCODING": "utf-8"
       }
-    },
-    "text-analysis-pro": {
-      "command": "D:\\projects\\env\\Scripts\\mcp-text-analysis.exe",
-      "args": [],
-      "env": {
-        "PYTHONIOENCODING": "utf-8"
-      }
     }
+    
   }
 
   }
